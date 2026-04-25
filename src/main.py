@@ -1,6 +1,6 @@
 import asyncio
 import os
-from datetime import datetime, date
+from datetime import datetime, date, UTC
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.session.aiohttp import AiohttpSession
@@ -29,10 +29,10 @@ async def message_start(message: Message):
     user = await get_tg_user(message.from_user)
     if user is None: return
 
-    status = user.expires_at >= datetime.now()
+    status = user.expires_at >= datetime.now(UTC)
     text = "GymMoodBot\n\n"
     if status:
-        expires_delta = (user.expires_at - datetime.now()).total_seconds()
+        expires_delta = (user.expires_at - datetime.now(UTC)).total_seconds()
         days = int(expires_delta // (24 * 60 * 60))
         hours = int((expires_delta % (24 * 60 * 60)) // (60 * 60))
         text += f"Подписка закончится через {days} дн., {hours} ч."
@@ -58,7 +58,7 @@ async def callback_admin(callback: CallbackQuery):
     text = "Админ панель\n\n"
     text += "Статистика:\n"
     text += f"Пользователей: {len(all_users)}\n"
-    text += f"Активных пользователей: {len([0 for user in all_users if user.expires_at > datetime.now()])}\n"
+    text += f"Активных пользователей: {len([0 for user in all_users if user.expires_at > datetime.now(UTC)])}\n"
 
     inline_keyboard = [
         [InlineKeyboardButton(text="Добавить пользователя", callback_data="add_user"),
