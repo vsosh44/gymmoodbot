@@ -1,0 +1,24 @@
+from datetime import datetime
+
+from sqlalchemy import ForeignKey, DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from src.database import Base
+
+
+class UserOrm(Base):
+    __tablename__ = "users"
+
+    tg_id: Mapped[int] = mapped_column(primary_key=True)
+    tg_username: Mapped[str]
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    classname: Mapped[str]
+    mood_id: Mapped[int]
+    next_mood_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class MoodLogOrm(Base):
+    __tablename__ = "mood_logs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.tg_id"))
+    mood_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
