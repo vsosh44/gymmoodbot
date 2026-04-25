@@ -75,7 +75,7 @@ async def callback_admin(callback: CallbackQuery):
 
 async def main():
     await create_all()
-    await scheduler()
+    asyncio.create_task(scheduler())
     await dp.start_polling(bot)
 
 
