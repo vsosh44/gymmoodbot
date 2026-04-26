@@ -8,8 +8,8 @@ from src.mood_action import scheduler
 from src.utils.config import settings
 from src.routers import bot_routers
 
-session = AiohttpSession(proxy="socks5://@127.0.0.1:10808")
-bot = Bot(token=settings.bot_token, session=session)
+#session = AiohttpSession(proxy="socks5://@127.0.0.1:10808")
+bot = Bot(token=settings.bot_token) #, session=session)
 dp = Dispatcher()
 
 
