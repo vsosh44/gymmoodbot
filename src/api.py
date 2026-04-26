@@ -1,8 +1,8 @@
 from datetime import datetime, date, timezone
 
-from src.enums import MoodType
-from src.httpclient import http_client
-from src.schemas import Mood
+from src.types.enums import MoodType
+from src.utils.httpclient import http_client
+from src.types.schemas import Mood
 
 
 async def get_moods(mood_classname: str, day: date) -> list[Mood]:

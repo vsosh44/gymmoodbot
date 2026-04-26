@@ -7,10 +7,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.api import send_mood
-from src.database import Session
-from src.enums import MoodType
-from src.models import UserOrm, MoodLogOrm
-from src.schemas import Mood
+from src.utils.database import Session
+from src.types.enums import MoodType
+from src.types.models import UserOrm, MoodLogOrm
+from src.types.schemas import Mood
 
 
 def next_random_time(start_hour, end_hour) -> datetime:

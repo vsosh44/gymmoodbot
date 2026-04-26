@@ -1,14 +1,14 @@
 from datetime import datetime
 from pydantic import BaseModel
-from src.enums import MoodType
+from src.types.enums import MoodType
 
 
 class User(BaseModel):
     tg_id: int
-    tg_username: str
     expires_at: datetime
     classname: str
     mood_id: int
+    next_mood_at: datetime
 
 
 class Mood(BaseModel):

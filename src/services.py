@@ -2,9 +2,9 @@ from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
-from src.schemas import User
-from src.models import UserOrm
-from src.database import Session
+from src.types.schemas import User
+from src.types.models import UserOrm
+from src.utils.database import Session
 
 
 async def get_user(tg_id: int) -> User | None:
