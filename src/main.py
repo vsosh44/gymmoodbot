@@ -18,7 +18,7 @@ from src.utils.config import settings
 from src.routers import bot_routers
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.WARNING,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 
