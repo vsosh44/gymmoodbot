@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime, time, timedelta, UTC
 from zoneinfo import ZoneInfo
 import random
+import logging
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +12,8 @@ from src.utils.database import Session
 from src.types.enums import MoodType
 from src.types.models import UserOrm, MoodLogOrm
 from src.types.schemas import Mood
+
+logger = logging.getLogger(__name__)
 
 
 def next_random_time(start_hour, end_hour) -> datetime:
@@ -63,7 +66,7 @@ async def process_users():
 
                     user.next_mood_at = next_random_time(7, 8)
                 except Exception as e:
-                    print("[ERROR] process_users():", e)
+                    logger.error("process_users(): %s", e)
 
                     user.next_mood_at = time_now + timedelta(minutes=15)
 
@@ -73,6 +76,6 @@ async def scheduler():
         try:
             await process_users()
         except Exception as e:
-            print("[ERROR] scheduler():", e)
+            logger.error("scheduler(): %s", e)
 
         await asyncio.sleep(60)
