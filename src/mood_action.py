@@ -61,8 +61,7 @@ async def process_users():
                         mood_time=time_now
                     ))
 
-                    user.next_mood_at = next_random_time(8, 10)
-                    print(f"[LOG] user.id={user.tg_id}, user.next_mood_at={user.next_mood_at}")
+                    user.next_mood_at = next_random_time(7, 8)
                 except Exception as e:
                     print("[ERROR] process_users():", e)
 

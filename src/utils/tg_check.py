@@ -1,14 +1,20 @@
+import logging
 from aiogram.types import User as TgUser
 
 from src.utils.config import settings
 from src.types.schemas import User
 from src.services import get_user
 
+logger = logging.getLogger(__name__)
+
 
 async def get_tg_user(tg_user: TgUser) -> User | None:
     tg_id = tg_user.id
-    user = await get_user(tg_id)
-    if user is None: return None
+    try:
+        user = await get_user(tg_id)
+    except Exception as e:
+        logger.error("database get_user() error: %s", e)
+        return None
     return user
 
 

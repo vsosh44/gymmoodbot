@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     postgres_password: str
     postgres_db: str
 
+    proxy: bool = False
+
     @computed_field
     @property
     def database_url(self) -> str:

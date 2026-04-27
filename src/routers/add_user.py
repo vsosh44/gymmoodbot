@@ -97,10 +97,13 @@ async def process_classname(message: Message, state: FSMContext):
         expires_at=expires_at,
         next_mood_at=datetime.now(UTC)
     )
-    await add_user(user)
-
-    await message.answer("Пользователь успешно добавлен")
-    await state.clear()
-
-    text, kb = await get_admin_panel()
-    await message.answer(text, reply_markup=kb)
+    try:
+        await add_user(user)
+    except Exception as e:
+        await message.answer(f"Ошибка при добавлении: {e}")
+    else:
+        await message.answer("Пользователь успешно добавлен")
+    finally:
+        await state.clear()
+        text, kb = await get_admin_panel()
+        await message.answer(text, reply_markup=kb)

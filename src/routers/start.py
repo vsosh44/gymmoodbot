@@ -21,7 +21,7 @@ async def message_start(message: Message):
         expires_delta = (user.expires_at - datetime.now(UTC)).total_seconds()
         days = int(expires_delta // (24 * 60 * 60))
         hours = int((expires_delta % (24 * 60 * 60)) // (60 * 60))
-        text += f"✅ Подписка закончится через {days} дн., {hours} ч"
+        text += f"✅ Подписка закончится через: <code>{days} дн., {hours} ч</code>"
     else:
         text += "Подписка неактивна"
 

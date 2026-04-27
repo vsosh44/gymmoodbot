@@ -1,3 +1,4 @@
+import asyncio
 from datetime import datetime, date, timezone
 
 from src.types.enums import MoodType

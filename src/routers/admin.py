@@ -1,4 +1,5 @@
 from datetime import datetime, UTC
+import logging
 
 from aiogram import F, Router
 from aiogram.types import CallbackQuery, InaccessibleMessage, InlineKeyboardButton, InlineKeyboardMarkup
@@ -7,10 +8,15 @@ from src.services import get_users
 from src.utils.tg_check import admin_check, get_tg_user
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 
 async def get_admin_panel():
-    all_users = await get_users()
+    try:
+        all_users = await get_users()
+    except Exception as e:
+        logger.error("database get_users() error: %s", e)
+        all_users = []
     text = "Админ панель\n\n"
     text += "Статистика:\n"
     text += f"Пользователей: {len(all_users)}\n"

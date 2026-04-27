@@ -8,39 +8,29 @@ from src.utils.database import Session
 
 
 async def get_user(tg_id: int) -> User | None:
-    try:
-        async with Session() as session:
-            stmt = select(UserOrm).where(UserOrm.tg_id == tg_id)
-            user = await session.scalar(stmt)
+    async with Session() as session:
+        stmt = select(UserOrm).where(UserOrm.tg_id == tg_id)
+        user = await session.scalar(stmt)
 
-            if user is None:
-                return None
+        if user is None:
+            return None
 
-            return User.model_validate(user, from_attributes=True)
-    except (SQLAlchemyError, ValidationError) as exc:
-        print("[ERROR] get_user() Error:", exc)
-        return None
+        return User.model_validate(user, from_attributes=True)
 
 
 async def get_users() -> list[User]:
-    try:
-        async with Session() as session:
-            stmt = select(UserOrm)
-            users = (await session.scalars(stmt)).all()
+    async with Session() as session:
+        stmt = select(UserOrm)
+        users = (await session.scalars(stmt)).all()
 
-            return [User.model_validate(user, from_attributes=True) for user in users]
-    except (SQLAlchemyError, ValidationError) as exc:
-        print("[ERROR] get_users() Error:", exc)
-        return []
+        return [User.model_validate(user, from_attributes=True) for user in users]
 
 
-async def add_user(user: User) -> bool:
+async def add_user(user: User):
     async with Session() as session:
         session.add(UserOrm(**user.model_dump()))
         try:
             await session.commit()
-            return True
-        except IntegrityError as e:
-            print("[ERROR] add_user() IntegrityError:", e)
+        except Exception:
             await session.rollback()
-            return False
+            raise
