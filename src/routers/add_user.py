@@ -4,7 +4,7 @@ from datetime import datetime, UTC, timedelta
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import CallbackQuery, InaccessibleMessage, Message
+from aiogram.types import CallbackQuery, InaccessibleMessage, Message, InlineKeyboardButton, InlineKeyboardMarkup
 
 from src.routers.admin import get_admin_panel
 from src.types.schemas import User
@@ -14,10 +14,29 @@ from src.utils.tg_check import admin_check, get_tg_user
 router = Router()
 
 
+def get_cancel_kb() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Отмена", callback_data="cancel_add_user")]
+        ]
+    )
+
+
 class AddUserState(StatesGroup):
     tg_id = State()
     mood_id = State()
     classname = State()
+
+
+@router.callback_query(F.data == "cancel_add_user")
+async def callback_cancel_add_user(callback: CallbackQuery, state: FSMContext):
+    if callback.message is None or isinstance(callback.message, InaccessibleMessage): return
+    if not admin_check(callback.from_user): return
+
+    await state.clear()
+
+    text, kb = await get_admin_panel()
+    await callback.message.answer(text, reply_markup=kb)
 
 
 @router.callback_query(F.data == "add_user")
@@ -27,7 +46,10 @@ async def callback_add_user(callback: CallbackQuery, state: FSMContext):
     user = await get_tg_user(callback.from_user)
     if user is None: return
 
-    await callback.message.answer("Введите число - telegram id пользователя")
+    await callback.message.answer(
+        "Введите число - telegram id пользователя",
+        reply_markup=get_cancel_kb(),
+    )
     await state.set_state(AddUserState.tg_id)
 
 
@@ -37,16 +59,25 @@ async def process_username(message: Message, state: FSMContext):
     if not admin_check(message.from_user): return
 
     if message.text is None:
-        await message.answer("Неверный формат данных")
+        await message.answer(
+            "Неверный формат данных",
+            reply_markup=get_cancel_kb(),
+        )
         return
 
     text = message.text
     if not text.isdigit():
-        await message.answer("Введите число - telegram id пользователя")
+        await message.answer(
+            "Введите число - telegram id пользователя",
+            reply_markup=get_cancel_kb(),
+        )
         return
     await state.update_data(tg_id=int(text))
 
-    await message.answer("Введите число - номер пользователя в системе")
+    await message.answer(
+        "Введите число - номер пользователя в системе",
+        reply_markup=get_cancel_kb(),
+    )
     await state.set_state(AddUserState.mood_id)
 
 
@@ -56,15 +87,24 @@ async def process_mood_id(message: Message, state: FSMContext):
     if not admin_check(message.from_user): return
 
     if message.text is None:
-        await message.answer("Неверный формат данных")
+        await message.answer(
+            "Неверный формат данных",
+            reply_markup=get_cancel_kb(),
+        )
         return
 
     if not message.text.isdigit():
-        await message.answer("Введите число - номер пользователя в системе")
+        await message.answer(
+            "Введите число - номер пользователя в системе",
+            reply_markup=get_cancel_kb(),
+        )
         return
     await state.update_data(mood_id=int(message.text))
 
-    await message.answer("Введите класс пользователя")
+    await message.answer(
+        "Введите класс пользователя",
+        reply_markup=get_cancel_kb(),
+    )
     await state.set_state(AddUserState.classname)
 
 
@@ -74,12 +114,18 @@ async def process_classname(message: Message, state: FSMContext):
     if not admin_check(message.from_user): return
 
     if message.text is None:
-        await message.answer("Неверный формат данных")
+        await message.answer(
+            "Неверный формат данных",
+            reply_markup=get_cancel_kb(),
+        )
         return
 
     classname = message.text.strip()
     if re.fullmatch(r"(?:[1-9]|1[01])[А-ЯЁ].*", classname) is None:
-        await message.answer("Введите правильное название класса. Например: 10Б")
+        await message.answer(
+            "Введите правильное название класса. Например: 10Б",
+            reply_markup=get_cancel_kb(),
+        )
         return
     await state.update_data(classname=classname)
 
