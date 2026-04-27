@@ -25,7 +25,8 @@ async def get_admin_panel():
     inline_keyboard = [
         [InlineKeyboardButton(text="Добавить пользователя", callback_data="add_user"),
          InlineKeyboardButton(text="Продлить пользователя", callback_data="renew_user")],
-        [InlineKeyboardButton(text="Забанить пользователя", callback_data="ban_user")]
+        [InlineKeyboardButton(text="Забанить пользователя", callback_data="ban_user")],
+        [InlineKeyboardButton(text="Назад", callback_data="back_to_start")]
     ]
     kb = InlineKeyboardMarkup(inline_keyboard=inline_keyboard)
 
