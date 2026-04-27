@@ -37,6 +37,7 @@ async def callback_cancel_add_user(callback: CallbackQuery, state: FSMContext):
 
     text, kb = await get_admin_panel()
     await callback.message.answer(text, reply_markup=kb)
+    await callback.answer()
 
 
 @router.callback_query(F.data == "add_user")
@@ -51,6 +52,7 @@ async def callback_add_user(callback: CallbackQuery, state: FSMContext):
         reply_markup=get_cancel_kb(),
     )
     await state.set_state(AddUserState.tg_id)
+    await callback.answer()
 
 
 @router.message(AddUserState.tg_id)
