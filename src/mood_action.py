@@ -30,6 +30,19 @@ def next_random_time(start_hour, end_hour) -> datetime:
     )
 
 
+def resolve_mood_type(mood_type: str) -> MoodType:
+    selected_mood = MoodType(mood_type)
+
+    if selected_mood == MoodType.random:
+        return random.choice([
+            MoodType.sunny,
+            MoodType.creative,
+            MoodType.peaceful,
+        ])
+
+    return selected_mood
+
+
 async def fetch_due_users(session: AsyncSession) -> list[UserOrm]:
     stmt = (
         select(UserOrm)
@@ -49,11 +62,11 @@ async def process_users():
         async with session.begin():
             users = await fetch_due_users(session)
             for user in users:
+                time_now = datetime.now(UTC)
                 try:
-                    time_now = datetime.now(UTC)
                     mood = Mood(
                         classname=user.classname,
-                        type=MoodType.sunny,
+                        type=resolve_mood_type(user.mood_type),
                         id=user.mood_id,
                         time=time_now
                     )

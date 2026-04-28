@@ -6,3 +6,4 @@ class MoodType(Enum):
     alarming = "rose"
     tired = "sky"
     peaceful = "sage"
+    random = "random"

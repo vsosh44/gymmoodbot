@@ -8,6 +8,7 @@ class User(BaseModel):
     expires_at: datetime
     classname: str
     mood_id: int
+    mood_type: MoodType = MoodType.random
     next_mood_at: datetime
 
 

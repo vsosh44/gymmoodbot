@@ -7,6 +7,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, InaccessibleMessage, Message, InlineKeyboardButton, InlineKeyboardMarkup
 
 from src.routers.admin import get_admin_panel
+from src.types.enums import MoodType
 from src.types.schemas import User
 from src.services import add_user
 from src.utils.tg_check import admin_check, get_tg_user
@@ -143,6 +144,7 @@ async def process_classname(message: Message, state: FSMContext):
         mood_id=mood_id,
         classname=classname,
         expires_at=expires_at,
+        mood_type=MoodType.random,
         next_mood_at=datetime.now(UTC)
     )
     try:
