@@ -9,6 +9,7 @@ class UserOrm(Base):
     __tablename__ = "users"
 
     tg_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    tg_username: Mapped[str | None] = mapped_column(String, nullable=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     classname: Mapped[str]
     mood_id: Mapped[int]

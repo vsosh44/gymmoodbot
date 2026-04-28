@@ -3,7 +3,7 @@ from aiogram.types import User as TgUser
 
 from src.utils.config import settings
 from src.types.schemas import User
-from src.services import get_user
+from src.services import get_user, update_user_tg_username
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,20 @@ async def get_tg_user(tg_user: TgUser) -> User | None:
     except Exception as e:
         logger.error("database get_user() error: %s", e)
         return None
+
+    if user is None:
+        return None
+
+    try:
+        await update_user_tg_username(tg_id, tg_user.username)
+    except Exception as e:
+        logger.exception(
+            "get_tg_user(): failed to update tg_username. tg_id: %s. username: %s. Error: %s",
+            tg_id,
+            tg_user.username,
+            e,
+        )
+
     return user
 
 
