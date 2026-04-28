@@ -16,6 +16,7 @@ from src.utils.database import create_all
 from src.mood_action import scheduler
 from src.utils.config import settings
 from src.routers import bot_routers
+from src.utils.httpclient import http_client
 
 logging.basicConfig(
     level=logging.WARNING,
@@ -65,9 +66,23 @@ async def global_error_handler(event: ErrorEvent) -> bool:
 
 async def main():
     await create_all()
-    asyncio.create_task(scheduler())
-    dp.include_routers(*bot_routers)
-    await dp.start_polling(bot)
+
+    scheduler_task = asyncio.create_task(scheduler())
+
+    try:
+        dp.include_routers(*bot_routers)
+        await dp.start_polling(bot)
+
+    finally:
+        scheduler_task.cancel()
+
+        try:
+            await scheduler_task
+        except asyncio.CancelledError:
+            pass
+
+        await http_client.close()
+        await bot.session.close()
 
 
 asyncio.run(main())
