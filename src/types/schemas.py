@@ -10,6 +10,7 @@ class User(BaseModel):
     mood_id: int
     mood_type: MoodType = MoodType.random
     next_mood_at: datetime
+    set_mood_on_weekends: bool = False
 
 
 class Mood(BaseModel):

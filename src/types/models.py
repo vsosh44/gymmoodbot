@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, DateTime, BigInteger, String
+from sqlalchemy import ForeignKey, DateTime, BigInteger, String, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 from src.utils.database import Base
 
@@ -15,6 +15,7 @@ class UserOrm(Base):
     mood_id: Mapped[int]
     mood_type: Mapped[str] = mapped_column(String, default="random")
     next_mood_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    set_mood_on_weekends: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class MoodLogOrm(Base):

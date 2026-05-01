@@ -145,7 +145,8 @@ async def process_classname(message: Message, state: FSMContext):
         classname=classname,
         expires_at=expires_at,
         mood_type=MoodType.random,
-        next_mood_at=datetime.now(UTC)
+        next_mood_at=datetime.now(UTC),
+        set_mood_on_weekends=False,
     )
     try:
         await add_user(user)

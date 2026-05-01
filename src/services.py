@@ -94,6 +94,30 @@ async def update_user_mood_type(tg_id: int, mood_type: MoodType) -> bool:
             raise
 
 
+async def update_user_set_mood_on_weekends(tg_id: int, set_mood_on_weekends: bool) -> bool:
+    async with Session() as session:
+        try:
+            stmt = select(UserOrm).where(UserOrm.tg_id == tg_id)
+            user = await session.scalar(stmt)
+
+            if user is None:
+                return False
+
+            user.set_mood_on_weekends = set_mood_on_weekends
+            await session.commit()
+
+            return True
+
+        except Exception as e:
+            await session.rollback()
+            logger.exception(
+                "update_user_set_mood_on_weekends(): failed to update user %s. Error: %s",
+                tg_id,
+                e,
+            )
+            raise
+
+
 async def update_user_tg_username(tg_id: int, tg_username: str | None) -> bool:
     try:
         async with Session() as session:
