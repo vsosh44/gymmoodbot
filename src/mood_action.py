@@ -102,7 +102,7 @@ async def process_users():
                         mood_time=time_now
                     ))
 
-                    user.next_mood_at = next_random_time(7, 8, user.set_mood_on_weekends)
+                    user.next_mood_at = next_random_time(8, 9, user.set_mood_on_weekends)
 
                 except Exception as e:
                     logger.warning(
