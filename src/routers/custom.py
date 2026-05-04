@@ -131,7 +131,7 @@ async def callback_customize_mood_type(callback: CallbackQuery):
     await callback.answer()
 
 
-@router.callback_query(F.data == "set_mood_type:")
+@router.callback_query(F.data.startswith("set_mood_type:"))
 async def callback_set_mood_type(callback: CallbackQuery):
     if callback.message is None or isinstance(callback.message, InaccessibleMessage): return
 
