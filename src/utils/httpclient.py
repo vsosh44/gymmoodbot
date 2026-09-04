@@ -1,5 +1,7 @@
 import asyncio
 import logging
+import re
+from collections.abc import Mapping
 from typing import Any
 
 from aiohttp import (
@@ -13,6 +15,8 @@ from aiohttp import (
 )
 
 logger = logging.getLogger(__name__)
+
+_HEADER_NAME_PATTERN = re.compile(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$")
 
 
 class HTTPClient:
@@ -36,10 +40,60 @@ class HTTPClient:
             await cls._session.close()
             cls._session = None
 
-    async def _request(self, method: str, url: str, **kwargs: Any) -> dict | list | None:
+    async def _request(
+        self,
+        method: str,
+        url: str,
+        *,
+        headers: Mapping[str, str] | None = None,
+        **kwargs: Any,
+    ) -> dict | list | None:
+        request_headers: dict[str, str] | None = None
+        if headers is not None:
+            if not isinstance(headers, Mapping):
+                logger.error(
+                    "HTTPClient %s request received headers that are not a mapping. URL: %s",
+                    method.upper(),
+                    url,
+                )
+                return None
+
+            try:
+                request_headers = dict(headers)
+            except Exception:
+                logger.exception(
+                    "HTTPClient %s request could not copy headers. URL: %s",
+                    method.upper(),
+                    url,
+                )
+                return None
+
+            for name, value in request_headers.items():
+                if not isinstance(name, str) or _HEADER_NAME_PATTERN.fullmatch(name) is None:
+                    logger.error(
+                        "HTTPClient %s request received an invalid header name. URL: %s",
+                        method.upper(),
+                        url,
+                    )
+                    return None
+
+                if not isinstance(value, str) or any(char in value for char in ("\r", "\n", "\0")):
+                    logger.error(
+                        "HTTPClient %s request received an invalid value for header %s. URL: %s",
+                        method.upper(),
+                        name,
+                        url,
+                    )
+                    return None
+
         for attempt in range(1, self._retry_count + 1):
             try:
-                async with self.session.request(method, url, **kwargs) as response:
+                async with self.session.request(
+                    method,
+                    url,
+                    headers=request_headers,
+                    **kwargs,
+                ) as response:
                     if response.status in {429, 500, 502, 503, 504}:
                         text = await response.text()
                         logger.warning(
@@ -56,7 +110,11 @@ class HTTPClient:
                             return None
 
                         retry_after = response.headers.get("Retry-After")
-                        delay = int(retry_after) if retry_after is not None and retry_after.isdigit() else self._retry_delay * attempt
+                        delay = (
+                            int(retry_after)
+                            if retry_after is not None and retry_after.isdigit()
+                            else self._retry_delay * attempt
+                        )
                         await asyncio.sleep(delay)
                         continue
 
@@ -140,11 +198,17 @@ class HTTPClient:
 
         return None
 
-    async def get(self, url: str) -> dict | list | None:
-        return await self._request("GET", url)
+    async def get(self, url: str, *, headers: Mapping[str, str] | None = None) -> dict | list | None:
+        return await self._request("GET", url, headers=headers)
 
-    async def post(self, url: str, data: dict) -> dict | list | None:
-        return await self._request("POST", url, json=data)
+    async def post(
+        self,
+        url: str,
+        data: dict,
+        *,
+        headers: Mapping[str, str] | None = None,
+    ) -> dict | list | None:
+        return await self._request("POST", url, headers=headers, json=data)
 
 
 http_client = HTTPClient()
