@@ -7,4 +7,4 @@ class MoodType(Enum):
     tired = "sky"
     peaceful = "sage"
     random = "random"
-    alarming_wed_thu_random_else = "alarming_wed_thu_random_else"
+    #alarming_wed_thu_random_else = "alarming_wed_thu_random_else"

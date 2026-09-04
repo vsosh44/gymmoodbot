@@ -51,14 +51,14 @@ def resolve_mood_type(mood_type: str, mood_time: datetime | None = None) -> Mood
     if selected_mood == MoodType.random:
         return resolve_random_mood_type()
 
-    if selected_mood == MoodType.alarming_wed_thu_random_else:
-        current_time = mood_time or datetime.now(ZoneInfo("Europe/Moscow"))
-        moscow_time = current_time.astimezone(ZoneInfo("Europe/Moscow"))
+    #if selected_mood == MoodType.alarming_wed_thu_random_else:
+    #    current_time = mood_time or datetime.now(ZoneInfo("Europe/Moscow"))
+    #    moscow_time = current_time.astimezone(ZoneInfo("Europe/Moscow"))
 
-        if moscow_time.weekday() in {2, 3}:
-            return MoodType.alarming
+    #    if moscow_time.weekday() in {2, 3}:
+    #        return MoodType.alarming
 
-        return resolve_random_mood_type()
+    #    return resolve_random_mood_type()
 
     return selected_mood
 
