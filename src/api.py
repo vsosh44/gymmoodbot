@@ -8,29 +8,35 @@ from src.types.schemas import Mood
 logger = logging.getLogger(__name__)
 
 
-async def get_moods(mood_classname: str, day: date) -> list[Mood]:
+async def get_moods(access_token: str, day: date) -> list[Mood]:
     date_str = day.isoformat()
 
-    url = f"https://my-garmony-default-rtdb.europe-west1.firebasedatabase.app/moods/{date_str}/{mood_classname}.json"
+    url = (f"https://app.xn----8sbivqdhdes5ni.xn--p1ai/rest/v1/mood_logs?"
+           f"select=id%2Cstudent_id%2Cmood%2Cscore%2Ccreated_at%2Clocal_date%2Cprofiles%21mood_logs_student_id_fkey%28full_name%29%2Cclasses%21mood_logs_class_id_fkey%28name%29&"
+           f"local_date=gte.{day.strftime("%Y-%m-%d")}&"
+           f"order=created_at.asc")
 
-    js = await http_client.get(url)
-    if not isinstance(js, dict):
-        logger.warning("get_moods(): empty or invalid response for class %s and day %s", mood_classname, date_str)
+    js = await http_client.get(url, access_token)
+    if not isinstance(js, dict) and not isinstance(js, list):
+        logger.warning("get_moods(): empty or invalid response for class %s and day %s", date_str)
         return []
 
     result = []
-    for key, js_mood in js.items():
+    for i, item in enumerate(js):
         try:
             mood = Mood(
-                operation_id=key,
-                classname=js_mood["class"],
-                type=MoodType(js_mood["mood"]),
-                id=int(js_mood["name"].split()[-1].removeprefix("№")),
-                time=datetime.strptime(js_mood["time"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+                classname=item["classes"]["name"],
+                type=MoodType(item["mood"]),
+                id=item["id"],
+                score=item["score"],
+                profile=item["profiles"]["full_name"],
+                student_id=item["student_id"],
+                created_at=datetime.strptime(item["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z").replace(tzinfo=timezone.utc),
+                local_date=datetime.strptime(item["local_date"], "%Y-%m-%d")
             )
             result.append(mood)
         except Exception as e:
-            logger.warning("get_moods(): skip invalid mood record %s. Error: %s", key, e)
+            logger.warning("get_moods(): skip invalid mood record %s. Error: %s", i, e)
 
     return result
 

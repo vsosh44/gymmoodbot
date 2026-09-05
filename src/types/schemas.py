@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from pydantic import BaseModel
 from src.types.enums import MoodType
 
@@ -14,8 +14,11 @@ class User(BaseModel):
 
 
 class Mood(BaseModel):
-    operation_id: str = ""
+    student_id: str
     classname: str
+    profile: str
     type: MoodType
-    id: int
-    time: datetime
+    id: str
+    score: int
+    created_at: datetime
+    local_date: date
