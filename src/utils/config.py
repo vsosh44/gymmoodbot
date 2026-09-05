@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     )
 
     bot_token: str
+    apikey: str
     admin_users: list[int]
     main_admin: int
 

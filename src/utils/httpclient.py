@@ -1,8 +1,5 @@
 import asyncio
 import logging
-import re
-from collections.abc import Mapping
-from typing import Any
 
 from aiohttp import (
     ClientConnectionError,
@@ -14,9 +11,9 @@ from aiohttp import (
     ServerTimeoutError,
 )
 
-logger = logging.getLogger(__name__)
+from utils.config import settings
 
-_HEADER_NAME_PATTERN = re.compile(r"^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$")
+logger = logging.getLogger(__name__)
 
 
 class HTTPClient:
@@ -44,55 +41,21 @@ class HTTPClient:
         self,
         method: str,
         url: str,
-        *,
-        headers: Mapping[str, str] | None = None,
-        **kwargs: Any,
+        access_token: str,
+        json: dict | None = None
     ) -> dict | list | None:
-        request_headers: dict[str, str] | None = None
-        if headers is not None:
-            if not isinstance(headers, Mapping):
-                logger.error(
-                    "HTTPClient %s request received headers that are not a mapping. URL: %s",
-                    method.upper(),
-                    url,
-                )
-                return None
-
-            try:
-                request_headers = dict(headers)
-            except Exception:
-                logger.exception(
-                    "HTTPClient %s request could not copy headers. URL: %s",
-                    method.upper(),
-                    url,
-                )
-                return None
-
-            for name, value in request_headers.items():
-                if not isinstance(name, str) or _HEADER_NAME_PATTERN.fullmatch(name) is None:
-                    logger.error(
-                        "HTTPClient %s request received an invalid header name. URL: %s",
-                        method.upper(),
-                        url,
-                    )
-                    return None
-
-                if not isinstance(value, str) or any(char in value for char in ("\r", "\n", "\0")):
-                    logger.error(
-                        "HTTPClient %s request received an invalid value for header %s. URL: %s",
-                        method.upper(),
-                        name,
-                        url,
-                    )
-                    return None
+        headers = {
+            "apikey": settings.apikey,
+            "Authorization": f"Bearer {access_token}"
+        }
 
         for attempt in range(1, self._retry_count + 1):
             try:
                 async with self.session.request(
                     method,
                     url,
-                    headers=request_headers,
-                    **kwargs,
+                    headers=headers,
+                    json=json
                 ) as response:
                     if response.status in {429, 500, 502, 503, 504}:
                         text = await response.text()
@@ -198,17 +161,11 @@ class HTTPClient:
 
         return None
 
-    async def get(self, url: str, *, headers: Mapping[str, str] | None = None) -> dict | list | None:
-        return await self._request("GET", url, headers=headers)
+    async def get(self, url: str, access_token: str) -> dict | list | None:
+        return await self._request("GET", url, access_token)
 
-    async def post(
-        self,
-        url: str,
-        data: dict,
-        *,
-        headers: Mapping[str, str] | None = None,
-    ) -> dict | list | None:
-        return await self._request("POST", url, headers=headers, json=data)
+    async def post(self, url: str, access_token: str, data: dict) -> dict | list | None:
+        return await self._request("POST", url, access_token, json=data)
 
 
 http_client = HTTPClient()
