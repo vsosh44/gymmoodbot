@@ -14,11 +14,11 @@ class User(BaseModel):
 
 
 class Mood(BaseModel):
-    student_id: str
-    classname: str
-    profile: str
+    student_id: str = ""
+    classname: str = ""
+    profile: str = ""
     type: MoodType
-    id: str
-    score: int
-    created_at: datetime
+    id: str = ""
+    score: int = 0
+    created_at: datetime = datetime(2000, 1,1)
     local_date: date

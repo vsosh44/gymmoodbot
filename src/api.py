@@ -8,9 +8,20 @@ from src.types.schemas import Mood
 logger = logging.getLogger(__name__)
 
 
-async def get_moods(access_token: str, day: date) -> list[Mood]:
-    date_str = day.isoformat()
+async def get_profile(access_token: str) -> tuple[str, str] :
+    url = "https://app.xn----8sbivqdhdes5ni.xn--p1ai/rest/v1/profiles?select=id%2Cclass_id"
 
+    js = await http_client.get(url, access_token)
+    if not isinstance(js, dict) and not isinstance(js, list):
+        logger.warning("get_moods(): empty or invalid response. Token: %s", access_token)
+        return "", ""
+
+    student_id = js[0]["id"]
+    class_id = js[0]["class_id"]
+    return student_id, class_id
+
+
+async def get_moods(access_token: str, day: date) -> list[Mood]:
     url = (f"https://app.xn----8sbivqdhdes5ni.xn--p1ai/rest/v1/mood_logs?"
            f"select=id%2Cstudent_id%2Cmood%2Cscore%2Ccreated_at%2Clocal_date%2Cprofiles%21mood_logs_student_id_fkey%28full_name%29%2Cclasses%21mood_logs_class_id_fkey%28name%29&"
            f"local_date=gte.{day.strftime("%Y-%m-%d")}&"
@@ -18,7 +29,7 @@ async def get_moods(access_token: str, day: date) -> list[Mood]:
 
     js = await http_client.get(url, access_token)
     if not isinstance(js, dict) and not isinstance(js, list):
-        logger.warning("get_moods(): empty or invalid response for class %s and day %s", date_str)
+        logger.warning("get_moods(): empty or invalid response. Token: %s", access_token)
         return []
 
     result = []
@@ -41,23 +52,24 @@ async def get_moods(access_token: str, day: date) -> list[Mood]:
     return result
 
 
-async def send_mood(mood: Mood) -> bool:
-    date_str = mood.time.date().isoformat()
-    datetime_str = mood.time.isoformat(timespec="milliseconds").replace("+00:00", "Z")
+async def send_mood(access_token: str, mood: Mood) -> bool:
+    student_id, class_id = await get_profile(access_token)
 
-    url = f"https://my-garmony-default-rtdb.europe-west1.firebasedatabase.app/moods/{date_str}/{mood.classname}.json"
-    data = {
-        "name": f"Ученик {mood.classname} №{mood.id}",
+    url = "https://app.xn----8sbivqdhdes5ni.xn--p1ai/rest/v1/mood_logs?on_conflict=student_id%2Clocal_date"
+
+    body = {
+        "student_id": student_id,
+        "class_id": class_id,
         "mood": mood.type.value,
-        "time": datetime_str,
-        "class": mood.classname
+        "score": 5,
+        "note": None,
+        "local_date": mood.local_date.strftime("%Y-%m-%d"),
     }
 
-    result = await http_client.post(url, data)
-
-    if result is None:
-        logger.warning("send_mood(): mood was not sent. Class: %s. Id: %s. Type: %s", mood.classname, mood.id, mood.type)
+    js = await http_client.post(url, access_token, body)
+    if js is None:
+        logger.warning("send_mood(): empty or invalid response for token %s", access_token)
         return False
 
-    logger.info("send_mood(): mood sent. Class: %s. Id: %s. Type: %s", mood.classname, mood.id, mood.type)
+    logger.info("send_mood(): mood sent. Token: %s, Type: %s", access_token, mood.type)
     return True
