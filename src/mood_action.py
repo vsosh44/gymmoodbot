@@ -11,7 +11,7 @@ from src.api import send_mood
 from src.utils.database import Session
 from src.types.enums import MoodType
 from src.types.models import UserOrm, MoodLogOrm
-from src.types.schemas import Mood
+from src.types.schemas import Mood, User
 
 logger = logging.getLogger(__name__)
 
@@ -35,13 +35,12 @@ def next_random_time(start_hour, end_hour, include_weekends: bool = False) -> da
 
 def resolve_random_mood_type() -> MoodType:
     return random.choice([
-        MoodType.sunny,
-        MoodType.creative,
-        MoodType.peaceful,
+        MoodType.joy,
+        MoodType.calm
     ])
 
 
-def resolve_mood_type(mood_type: str, mood_time: datetime | None = None) -> MoodType:
+def resolve_mood_type(mood_type: str) -> MoodType:
     try:
         selected_mood = MoodType(mood_type)
     except ValueError:
@@ -50,15 +49,6 @@ def resolve_mood_type(mood_type: str, mood_time: datetime | None = None) -> Mood
 
     if selected_mood == MoodType.random:
         return resolve_random_mood_type()
-
-    #if selected_mood == MoodType.alarming_wed_thu_random_else:
-    #    current_time = mood_time or datetime.now(ZoneInfo("Europe/Moscow"))
-    #    moscow_time = current_time.astimezone(ZoneInfo("Europe/Moscow"))
-
-    #    if moscow_time.weekday() in {2, 3}:
-    #        return MoodType.alarming
-
-    #    return resolve_random_mood_type()
 
     return selected_mood
 
@@ -87,13 +77,11 @@ async def process_users():
 
                 try:
                     mood = Mood(
-                        classname=user.classname,
-                        type=resolve_mood_type(user.mood_type, time_now),
-                        id=user.mood_id,
-                        time=time_now
+                        type=resolve_mood_type(user.mood_type),
+                        local_date=time_now.date(),
                     )
 
-                    sent = await send_mood(mood)
+                    sent = await send_mood(User.model_validate(user, from_attributes=True), mood)
                     if not sent:
                         raise RuntimeError("Mood was not sent to API")
 
@@ -102,7 +90,7 @@ async def process_users():
                         mood_time=time_now
                     ))
 
-                    user.next_mood_at = next_random_time(8, 9, user.set_mood_on_weekends)
+                    user.next_mood_at = next_random_time(7, 8, user.set_mood_on_weekends)
 
                 except Exception as e:
                     logger.warning(

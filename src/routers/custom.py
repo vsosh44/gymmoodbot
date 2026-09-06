@@ -10,13 +10,8 @@ router = Router()
 
 def get_mood_title(mood_type: MoodType) -> str:
     titles = {
-        MoodType.sunny: "Солнечное",
-        MoodType.creative: "Творческое",
-        MoodType.alarming: "Тревожное",
-        MoodType.tired: "Усталое",
-        MoodType.peaceful: "Спокойное",
-        MoodType.random: "Случайное",
-        #MoodType.alarming_wed_thu_random_else: "Тревожное (среда и четверг)",
+        MoodType.joy: "Радость",
+        MoodType.calm: "Спокойствие"
     }
 
     return titles.get(mood_type, mood_type.name)
@@ -24,10 +19,7 @@ def get_mood_title(mood_type: MoodType) -> str:
 
 def get_mood_description(mood_type: MoodType) -> str:
     if mood_type == MoodType.random:
-        return "Случайное настроение: солнечное, творческое или спокойное"
-
-    #if mood_type == MoodType.alarming_wed_thu_random_else:
-    #    return "По средам и четвергам — тревожное, в остальные дни — случайное"
+        return "Случайное настроение: Радость, Спокойствие или Вдохновение"
 
     return get_mood_title(mood_type)
 

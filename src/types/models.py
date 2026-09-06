@@ -13,6 +13,7 @@ class UserOrm(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     classname: Mapped[str]
     mood_id: Mapped[int]
+    password: Mapped[str]
     mood_type: Mapped[str] = mapped_column(String, default="random")
     next_mood_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     set_mood_on_weekends: Mapped[bool] = mapped_column(Boolean, default=False)

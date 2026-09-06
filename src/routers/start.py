@@ -1,7 +1,7 @@
 from datetime import datetime, UTC
 
 from aiogram import F, Router
-from aiogram.filters import Command
+from aiogram.filters import CommandStart
 from aiogram.types import CallbackQuery, Message, InaccessibleMessage, InlineKeyboardButton, InlineKeyboardMarkup
 
 from src.utils.tg_check import get_tg_user, admin_check
@@ -33,7 +33,7 @@ async def get_start_menu(tg_user):
     return text, kb
 
 
-@router.message(Command("start"))
+@router.message(CommandStart)
 async def message_start(message: Message):
     if message is None or isinstance(message, InaccessibleMessage) or message.from_user is None: return
 

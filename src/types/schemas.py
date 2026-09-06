@@ -5,6 +5,7 @@ from src.types.enums import MoodType
 
 class User(BaseModel):
     tg_id: int
+    tg_username: str | None = None
     expires_at: datetime
     classname: str
     mood_id: int

@@ -26,6 +26,7 @@ def get_cancel_kb() -> InlineKeyboardMarkup:
 class AddUserState(StatesGroup):
     tg_id = State()
     mood_id = State()
+    password = State()
     classname = State()
 
 
@@ -108,6 +109,34 @@ async def process_mood_id(message: Message, state: FSMContext):
         "Введите класс пользователя",
         reply_markup=get_cancel_kb(),
     )
+    await state.set_state(AddUserState.password)
+
+
+@router.message(AddUserState.password)
+async def process_password(message: Message, state: FSMContext):
+    if message is None or isinstance(message, InaccessibleMessage) or message.from_user is None: return
+    if not admin_check(message.from_user): return
+
+    if message.text is None:
+        await message.answer(
+            "Неверный формат данных",
+            reply_markup=get_cancel_kb(),
+        )
+        return
+
+    password = message.text.strip()
+    if not password:
+        await message.answer(
+            "Пароль не может быть пустым. Введите пароль пользователя",
+            reply_markup=get_cancel_kb(),
+        )
+        return
+    await state.update_data(password=password)
+
+    await message.answer(
+        "Введите класс пользователя",
+        reply_markup=get_cancel_kb(),
+    )
     await state.set_state(AddUserState.classname)
 
 
@@ -136,12 +165,14 @@ async def process_classname(message: Message, state: FSMContext):
 
     tg_id = data.get("tg_id", 0)
     mood_id = data.get("mood_id", 0)
+    password = data.get("password", "")
     classname = data.get("classname", "")
 
     expires_at = datetime.now(UTC) + timedelta(days=30)
     user = User(
         tg_id=tg_id,
         mood_id=mood_id,
+        password=password,
         classname=classname,
         expires_at=expires_at,
         mood_type=MoodType.random,

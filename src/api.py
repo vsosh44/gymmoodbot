@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from datetime import datetime, date, timezone
 
@@ -69,8 +70,10 @@ async def get_moods(access_token: str, day: date) -> list[Mood]:
     return result
 
 
-async def send_mood(access_token: str, mood: Mood) -> bool:
+async def send_mood(user: User, mood: Mood) -> bool:
+    access_token = await student_login(user)
     student_id, class_id = await get_profile(access_token)
+    await asyncio.sleep(4)
 
     url = "https://app.xn----8sbivqdhdes5ni.xn--p1ai/rest/v1/mood_logs?on_conflict=student_id%2Clocal_date"
 
