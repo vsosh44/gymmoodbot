@@ -8,6 +8,7 @@ class User(BaseModel):
     expires_at: datetime
     classname: str
     mood_id: int
+    password: str
     mood_type: MoodType = MoodType.random
     next_mood_at: datetime
     set_mood_on_weekends: bool = False

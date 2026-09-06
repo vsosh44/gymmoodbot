@@ -3,9 +3,26 @@ from datetime import datetime, date, timezone
 
 from src.types.enums import MoodType
 from src.utils.httpclient import http_client
-from src.types.schemas import Mood
+from src.types.schemas import Mood, User
 
 logger = logging.getLogger(__name__)
+
+
+async def student_login(user: User) -> str:
+    url = "https://app.xn----8sbivqdhdes5ni.xn--p1ai/functions/v1/student-login"
+
+    body = {
+        "className": user.classname,
+        "studentNo": user.mood_id,
+        "password": user.password
+    }
+
+    js = await http_client.post(url, "", body)
+    if js is None:
+        logger.warning("student_login(): empty or invalid response. User id: %s, classname: %s, password: %s", str(user.mood_id), user.classname, user.password)
+        return ""
+
+    return js["access_token"]
 
 
 async def get_profile(access_token: str) -> tuple[str, str] :
