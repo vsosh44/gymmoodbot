@@ -99,7 +99,7 @@ async def process_users():
                         e,
                     )
 
-                    user.next_mood_at = time_now + timedelta(minutes=15)
+                    user.next_mood_at = time_now + timedelta(minutes=1)
 
 
 async def scheduler():
