@@ -11,7 +11,7 @@ from aiohttp import (
     ServerTimeoutError,
 )
 
-from utils.config import settings
+from src.utils.config import settings
 
 logger = logging.getLogger(__name__)
 
