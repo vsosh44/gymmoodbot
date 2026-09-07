@@ -1,0 +1,16 @@
+[Unit]
+Description=GymMoodBot
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/root/gymmoodbot
+ExecStart=/root/gymmoodbot/.local/bin/uv run src/main.py
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
